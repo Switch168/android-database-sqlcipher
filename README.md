@@ -138,6 +138,8 @@ make init
 make build-debug
 # or for a release build:
 make build-release
+
+make jars
 ```
 
 ### License
