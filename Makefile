@@ -29,7 +29,7 @@ build-release: check
 jars:
 	rm -rf lib *.jar
 	cp android-database-sqlcipher/build/intermediates/packaged-classes/release/classes.jar android-database-sqlcipher-classes.jar
-	cp -r android-database-sqlcipher/build/intermediates/library_and_local_jars_jni/release lib
+	cp -r android-database-sqlcipher/build/intermediates/merged_jni_libs/release/out lib
 	jar cf android-database-sqlcipher-ndk.jar lib
 
 publish-local-snapshot:

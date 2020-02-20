@@ -80,7 +80,7 @@ public class SupportHelper implements SupportSQLiteOpenHelper {
     public SupportSQLiteDatabase getWritableDatabase() {
         SQLiteDatabase result;
         try {
-            result = standardHelper.getWritableDatabase(passphrase);
+            result = standardHelper.getWritableDatabase(passphrase, "");
         } catch (SQLiteException ex){
             if(passphrase != null){
                 boolean isCleared = true;

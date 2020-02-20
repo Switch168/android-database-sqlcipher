@@ -1085,8 +1085,8 @@ public class SQLiteDatabase extends SQLiteClosable implements
    * @throws SQLiteException if the database cannot be opened
    * @throws IllegalArgumentException if the database path is null
    */
-  public static SQLiteDatabase openDatabase(String path, String password, CursorFactory factory, int flags) {
-    return openDatabase(path, password, factory, flags, null);
+  public static SQLiteDatabase openDatabase(String path, String password, String salt, CursorFactory factory, int flags) {
+    return openDatabase(path, password, salt, factory, flags, null);
   }
 
   /**
@@ -1107,8 +1107,8 @@ public class SQLiteDatabase extends SQLiteClosable implements
    * @throws SQLiteException if the database cannot be opened
    * @throws IllegalArgumentException if the database path is null
    */
-  public static SQLiteDatabase openDatabase(String path, char[] password, CursorFactory factory, int flags) {
-    return openDatabase(path, password, factory, flags, null, null);
+  public static SQLiteDatabase openDatabase(String path, char[] password, String salt, CursorFactory factory, int flags) {
+    return openDatabase(path, password, salt, factory, flags, null, null);
   }
 
   /**
@@ -1131,8 +1131,8 @@ public class SQLiteDatabase extends SQLiteClosable implements
    * @throws SQLiteException if the database cannot be opened
    * @throws IllegalArgumentException if the database path is null
    */
-  public static SQLiteDatabase openDatabase(String path, String password, CursorFactory factory, int flags, SQLiteDatabaseHook hook) {
-    return openDatabase(path, password, factory, flags, hook, null);
+  public static SQLiteDatabase openDatabase(String path, String password, String salt, CursorFactory factory, int flags, SQLiteDatabaseHook hook) {
+    return openDatabase(path, password, salt, factory, flags, hook, null);
   }
 
   /**
@@ -1155,8 +1155,8 @@ public class SQLiteDatabase extends SQLiteClosable implements
    * @throws SQLiteException if the database cannot be opened
    * @throws IllegalArgumentException if the database path is null
    */
-  public static SQLiteDatabase openDatabase(String path, char[] password, CursorFactory factory, int flags, SQLiteDatabaseHook hook) {
-    return openDatabase(path, password, factory, flags, hook, null);
+  public static SQLiteDatabase openDatabase(String path, char[] password, String salt, CursorFactory factory, int flags, SQLiteDatabaseHook hook) {
+    return openDatabase(path, password, salt, factory, flags, hook, null);
   }
 
   /**
@@ -1181,9 +1181,9 @@ public class SQLiteDatabase extends SQLiteClosable implements
    * @throws SQLiteException if the database cannot be opened
    * @throws IllegalArgumentException if the database path is null
    */
-  public static SQLiteDatabase openDatabase(String path, String password, CursorFactory factory, int flags,
+  public static SQLiteDatabase openDatabase(String path, String password, String salt, CursorFactory factory, int flags,
                                             SQLiteDatabaseHook hook, DatabaseErrorHandler errorHandler) {
-    return openDatabase(path, password == null ? null : password.toCharArray(), factory, flags, hook, errorHandler);
+    return openDatabase(path, password == null ? null : password.toCharArray(), salt, factory, flags, hook, errorHandler);
   }
 
 /**
@@ -1208,10 +1208,10 @@ public class SQLiteDatabase extends SQLiteClosable implements
    * @throws SQLiteException if the database cannot be opened
    * @throws IllegalArgumentException if the database path is null
    */
-  public static SQLiteDatabase openDatabase(String path, char[] password, CursorFactory factory, int flags,
+  public static SQLiteDatabase openDatabase(String path, char[] password, String salt, CursorFactory factory, int flags,
                                             SQLiteDatabaseHook hook, DatabaseErrorHandler errorHandler) {
     byte[] keyMaterial = getBytes(password);
-    return openDatabase(path, keyMaterial, factory, flags, hook, errorHandler);
+    return openDatabase(path, keyMaterial, salt, factory, flags, hook, errorHandler);
   }
 
   /**
@@ -1236,7 +1236,7 @@ public class SQLiteDatabase extends SQLiteClosable implements
    * @throws SQLiteException if the database cannot be opened
    * @throws IllegalArgumentException if the database path is null
    */
-  public static SQLiteDatabase openDatabase(String path, byte[] password, CursorFactory factory, int flags,
+  public static SQLiteDatabase openDatabase(String path, byte[] password, String salt, CursorFactory factory, int flags,
                                             SQLiteDatabaseHook hook, DatabaseErrorHandler errorHandler) {
     SQLiteDatabase sqliteDatabase = null;
     DatabaseErrorHandler myErrorHandler = (errorHandler != null) ? errorHandler : new DefaultDatabaseErrorHandler();
@@ -1244,7 +1244,7 @@ public class SQLiteDatabase extends SQLiteClosable implements
     try {
       // Open the database.
       sqliteDatabase = new SQLiteDatabase(path, factory, flags, myErrorHandler);
-      sqliteDatabase.openDatabaseInternal(password, hook);
+      sqliteDatabase.openDatabaseInternal(password, salt, hook);
     } catch (SQLiteDatabaseCorruptException e) {
       // Try to recover from this, if possible.
       // FUTURE TBD: should we consider this for other open failures?
@@ -1260,7 +1260,7 @@ public class SQLiteDatabase extends SQLiteClosable implements
 
       // try *once* again:
       sqliteDatabase = new SQLiteDatabase(path, factory, flags, myErrorHandler);
-      sqliteDatabase.openDatabaseInternal(password, hook);
+      sqliteDatabase.openDatabaseInternal(password, salt, hook);
     }
 
     if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
@@ -1278,76 +1278,76 @@ public class SQLiteDatabase extends SQLiteClosable implements
   }
 
   /**
-   * Equivalent to openDatabase(file.getPath(), password, factory, CREATE_IF_NECESSARY, databaseHook).
+   * Equivalent to openDatabase(file.getPath(), password, salt, factory, CREATE_IF_NECESSARY, databaseHook).
    */
-  public static SQLiteDatabase openOrCreateDatabase(File file, String password, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
-    return openOrCreateDatabase(file, password, factory, databaseHook, null);
+  public static SQLiteDatabase openOrCreateDatabase(File file, String password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
+    return openOrCreateDatabase(file, password, salt, factory, databaseHook, null);
   }
 
   /**
-   * Equivalent to openDatabase(path, password, factory, CREATE_IF_NECESSARY, databaseHook).
+   * Equivalent to openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, databaseHook).
    */
-  public static SQLiteDatabase openOrCreateDatabase(File file, String password, CursorFactory factory, SQLiteDatabaseHook databaseHook,
+  public static SQLiteDatabase openOrCreateDatabase(File file, String password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook,
                                                     DatabaseErrorHandler errorHandler) {
-    return openOrCreateDatabase(file == null ? null : file.getPath(), password, factory, databaseHook, errorHandler);
+    return openOrCreateDatabase(file == null ? null : file.getPath(), password, salt, factory, databaseHook, errorHandler);
   }
 
   /**
-   * Equivalent to openDatabase(path, password, factory, CREATE_IF_NECESSARY, databaseHook).
+   * Equivalent to openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, databaseHook).
    */
-  public static SQLiteDatabase openOrCreateDatabase(String path, String password, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, databaseHook);
+  public static SQLiteDatabase openOrCreateDatabase(String path, String password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, databaseHook);
   }
 
-  public static SQLiteDatabase openOrCreateDatabase(String path, String password, CursorFactory factory, SQLiteDatabaseHook databaseHook,
+  public static SQLiteDatabase openOrCreateDatabase(String path, String password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook,
                                                     DatabaseErrorHandler errorHandler) {
-    return openDatabase(path, password == null ? null : password.toCharArray(), factory, CREATE_IF_NECESSARY, databaseHook, errorHandler);
+    return openDatabase(path, password == null ? null : password.toCharArray(), salt, factory, CREATE_IF_NECESSARY, databaseHook, errorHandler);
   }
 
-  public static SQLiteDatabase openOrCreateDatabase(String path, char[] password, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, databaseHook);
+  public static SQLiteDatabase openOrCreateDatabase(String path, char[] password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, databaseHook);
   }
 
-  public static SQLiteDatabase openOrCreateDatabase(String path, char[] password, CursorFactory factory, SQLiteDatabaseHook databaseHook,
+  public static SQLiteDatabase openOrCreateDatabase(String path, char[] password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook,
                                                     DatabaseErrorHandler errorHandler) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, databaseHook, errorHandler);
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, databaseHook, errorHandler);
   }
 
-  public static SQLiteDatabase openOrCreateDatabase(String path, byte[] password, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, databaseHook, null);
+  public static SQLiteDatabase openOrCreateDatabase(String path, byte[] password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook) {
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, databaseHook, null);
   }
 
-  public static SQLiteDatabase openOrCreateDatabase(String path, byte[] password, CursorFactory factory, SQLiteDatabaseHook databaseHook,
+  public static SQLiteDatabase openOrCreateDatabase(String path, byte[] password, String salt, CursorFactory factory, SQLiteDatabaseHook databaseHook,
                                                     DatabaseErrorHandler errorHandler) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, databaseHook, errorHandler);
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, databaseHook, errorHandler);
   }
 
   /**
-   * Equivalent to openDatabase(file.getPath(), password, factory, CREATE_IF_NECESSARY).
+   * Equivalent to openDatabase(file.getPath(), password, salt, factory, CREATE_IF_NECESSARY).
    */
-  public static SQLiteDatabase openOrCreateDatabase(File file, String password, CursorFactory factory) {
-    return openOrCreateDatabase(file, password, factory, null);
+  public static SQLiteDatabase openOrCreateDatabase(File file, String password, String salt, CursorFactory factory) {
+    return openOrCreateDatabase(file, password, salt, factory, null);
   }
 
   /**
-   * Equivalent to openDatabase(path, password, factory, CREATE_IF_NECESSARY).
+   * Equivalent to openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY).
    */
-  public static SQLiteDatabase openOrCreateDatabase(String path, String password, CursorFactory factory) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, null);
+  public static SQLiteDatabase openOrCreateDatabase(String path, String password, String salt, CursorFactory factory) {
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, null);
   }
 
   /**
-   * Equivalent to openDatabase(path, password, factory, CREATE_IF_NECESSARY).
+   * Equivalent to openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY).
    */
-  public static SQLiteDatabase openOrCreateDatabase(String path, char[] password, CursorFactory factory) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, null);
+  public static SQLiteDatabase openOrCreateDatabase(String path, char[] password, String salt, CursorFactory factory) {
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, null);
   }
 
   /**
-   * Equivalent to openDatabase(path, password, factory, CREATE_IF_NECESSARY).
+   * Equivalent to openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY).
    */
-  public static SQLiteDatabase openOrCreateDatabase(String path, byte[] password, CursorFactory factory) {
-    return openDatabase(path, password, factory, CREATE_IF_NECESSARY, null, null);
+  public static SQLiteDatabase openOrCreateDatabase(String path, byte[] password, String salt, CursorFactory factory) {
+    return openDatabase(path, password, salt, factory, CREATE_IF_NECESSARY, null, null);
   }
 
   /**
@@ -1365,9 +1365,9 @@ public class SQLiteDatabase extends SQLiteClosable implements
    *
    * @throws SQLiteException if the database cannot be opened
    */
-  public static SQLiteDatabase create(CursorFactory factory, String password) {
+  public static SQLiteDatabase create(CursorFactory factory, String password, String salt) {
     // This is a magic string with special meaning for SQLite.
-    return openDatabase(MEMORY, password == null ? null : password.toCharArray(), factory, CREATE_IF_NECESSARY);
+    return openDatabase(MEMORY, password == null ? null : password.toCharArray(), salt, factory, CREATE_IF_NECESSARY);
   }
 
   /**
@@ -1385,8 +1385,8 @@ public class SQLiteDatabase extends SQLiteClosable implements
    *
    * @throws SQLiteException if the database cannot be opened
    */
-  public static SQLiteDatabase create(CursorFactory factory, char[] password) {
-    return openDatabase(MEMORY, password, factory, CREATE_IF_NECESSARY);
+  public static SQLiteDatabase create(CursorFactory factory, char[] password, String salt) {
+    return openDatabase(MEMORY, password, salt, factory, CREATE_IF_NECESSARY);
   }
 
 
@@ -2529,9 +2529,9 @@ public class SQLiteDatabase extends SQLiteClosable implements
      * @throws SQLiteException if the database cannot be opened
      * @throws IllegalArgumentException if the database path is null
      */
-    public SQLiteDatabase(String path, char[] password, CursorFactory factory, int flags) {
+    public SQLiteDatabase(String path, char[] password, String salt, CursorFactory factory, int flags) {
         this(path, factory, flags, null);
-        this.openDatabaseInternal(password, null);
+        this.openDatabaseInternal(password, salt, null);
     }
 
     /**
@@ -2550,14 +2550,14 @@ public class SQLiteDatabase extends SQLiteClosable implements
      * @throws SQLiteException if the database cannot be opened
      * @throws IllegalArgumentException if the database path is null
      */
-    public SQLiteDatabase(String path, char[] password, CursorFactory factory, int flags, SQLiteDatabaseHook databaseHook) {
+    public SQLiteDatabase(String path, char[] password, String salt, CursorFactory factory, int flags, SQLiteDatabaseHook databaseHook) {
         this(path, factory, flags, null);
-        this.openDatabaseInternal(password, databaseHook);
+        this.openDatabaseInternal(password,salt, databaseHook);
     }
 
-    public SQLiteDatabase(String path, byte[] password, CursorFactory factory, int flags, SQLiteDatabaseHook databaseHook) {
+    public SQLiteDatabase(String path, byte[] password, String salt, CursorFactory factory, int flags, SQLiteDatabaseHook databaseHook) {
         this(path, factory, flags, null);
-        this.openDatabaseInternal(password, databaseHook);
+        this.openDatabaseInternal(password, salt, databaseHook);
     }
 
     /**
@@ -2587,12 +2587,12 @@ public class SQLiteDatabase extends SQLiteClosable implements
         mErrorHandler = errorHandler;
     }
 
-    private void openDatabaseInternal(final char[] password, SQLiteDatabaseHook hook) {
+    private void openDatabaseInternal(final char[] password, String salt, SQLiteDatabaseHook hook) {
         final byte[] keyMaterial = getBytes(password);
-        openDatabaseInternal(keyMaterial, hook);
+        openDatabaseInternal(keyMaterial, salt, hook);
     }
 
-    private void openDatabaseInternal(final byte[] password, SQLiteDatabaseHook hook) {
+    private void openDatabaseInternal(final byte[] password, final String salt, SQLiteDatabaseHook hook) {
         boolean shouldCloseConnection = true;
         dbopen(mPath, mFlags);
         try {
@@ -2600,6 +2600,8 @@ public class SQLiteDatabase extends SQLiteClosable implements
                     public void run() {
                         if(password != null && password.length > 0) {
                             key(password);
+                            rawExecSQL("PRAGMA cipher_plaintext_header_size = 32;");
+                            rawExecSQL("PRAGMA cipher_salt =\"x'" + salt + "'\" ");
                         }
                     }
                 });
